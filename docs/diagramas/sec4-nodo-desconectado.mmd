@@ -1,0 +1,23 @@
+sequenceDiagram
+    autonumber
+    participant P as Planificador
+    participant JD as JobDesconexion
+    participant NR as NodoRepository
+    participant RD as ReglaDesconexion
+    participant AS as AlertaService
+    participant NS as NotificacionService
+    P->>JD: ejecutar() cada minuto
+    JD->>NR: activos()
+    NR-->>JD: nodos
+    loop Por cada nodo
+        JD->>RD: evaluar(nodo, ahora)
+        RD-->>JD: ResultadoRegla
+        alt Superó el tiempo sin reportar y no tiene alerta abierta
+            JD->>AS: abrir(generador_id, DESCONEXION)
+            AS->>NS: encolar(alerta, contactos)
+        end
+    end
+    Note over P,NS: Cuando el nodo vuelve a enviar una lectura
+    AS->>AS: on_lectura_procesada(evento)
+    AS->>AS: cerrar(alerta de desconexión)
+    AS->>NS: encolar(aviso de normalización, contactos)

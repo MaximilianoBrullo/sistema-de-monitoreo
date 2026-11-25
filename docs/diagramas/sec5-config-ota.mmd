@@ -1,0 +1,29 @@
+sequenceDiagram
+    autonumber
+    participant TE as TrabajoEnvio
+    participant API as ClienteApi
+    participant SV as Servidor
+    participant CF as Configuracion
+    participant OTA as ActualizadorOta
+    participant BL as Bootloader
+    TE->>API: enviarLote(lote)
+    API->>SV: POST /api/v1/lecturas
+    SV-->>API: 201 con configNueva y urlOta
+    API-->>TE: RespuestaApi
+    opt Hay configuración nueva
+        TE->>CF: aplicar(configNueva)
+        CF->>CF: validar y guardar en NVS
+    end
+    opt Hay firmware nuevo
+        TE->>OTA: actualizar(urlOta)
+        OTA->>SV: GET firmware.bin por HTTPS
+        SV-->>OTA: imagen del firmware
+        OTA->>OTA: escribir en la partición OTA libre y verificar
+        OTA->>BL: reiniciar en la versión nueva
+        BL->>OTA: arranque pendiente de confirmación
+        alt Primer envío al servidor exitoso
+            OTA->>BL: confirmarArranque()
+        else Falla o se reinicia antes de confirmar
+            BL->>BL: volver a la versión anterior
+        end
+    end

@@ -1,0 +1,87 @@
+classDiagram
+    direction LR
+    class Cliente {
+        +int id
+        +str nombre
+    }
+    class Usuario {
+        +int id
+        +str email
+        +str hash_password
+        +Rol rol
+    }
+    class Sitio {
+        +int id
+        +str nombre
+        +str ubicacion
+    }
+    class Contacto {
+        +int id
+        +str nombre
+        +str email
+        +str whatsapp
+    }
+    class Generador {
+        +int id
+        +str nombre
+        +EstadoMarcha estado
+        +float horas_marcha
+    }
+    class Tanque {
+        +int id
+        +float capacidad_l
+        +str tipo_geometria
+        +dict parametros
+        +float umbral_bajo
+        +float umbral_critico
+        +float umbral_alto
+        +float margen_robo_l
+    }
+    class Nodo {
+        +str id
+        +str token_hash
+        +str version_firmware
+        +datetime ultima_comunicacion
+        +dict config
+    }
+    class Canal {
+        +int id
+        +str variable
+        +str unidad
+    }
+    class Lectura {
+        +int id
+        +int seq
+        +float valor_crudo
+        +float valor_procesado
+        +datetime medido_en
+        +datetime recibido_en
+        +bool valida
+    }
+    class Alerta {
+        +int id
+        +TipoAlerta tipo
+        +EstadoAlerta estado
+        +float valor
+        +datetime abierta_en
+        +datetime cerrada_en
+        +reconocer(usuario)
+        +resolver()
+    }
+    class Evento {
+        +int id
+        +TipoEvento tipo
+        +float litros
+        +datetime ocurrido_en
+    }
+    Cliente "1" --> "*" Usuario
+    Cliente "1" --> "*" Sitio
+    Cliente "1" --> "*" Contacto : globales
+    Sitio "1" --> "*" Contacto : del sitio
+    Sitio "1" --> "*" Generador
+    Generador "1" --> "1..*" Tanque
+    Generador "1" --> "0..1" Nodo
+    Nodo "1" --> "*" Canal
+    Canal "1" --> "*" Lectura
+    Generador "1" --> "*" Alerta
+    Generador "1" --> "*" Evento

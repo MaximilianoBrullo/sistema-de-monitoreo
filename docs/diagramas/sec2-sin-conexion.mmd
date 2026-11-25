@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant TE as TrabajoEnvio
+    participant AL as AlmacenLocal
+    participant GC as GestorConexion
+    participant API as ClienteApi
+    participant SV as Servidor
+    TE->>AL: guardar(medicion)
+    TE->>GC: conectado()
+    GC-->>TE: false
+    Note over TE,GC: La lectura queda guardada en LittleFS
+    loop Reintentos con espera creciente
+        GC->>GC: actualizar() y reconectar WiFi
+    end
+    TE->>GC: conectado()
+    GC-->>TE: true
+    loop Mientras pendientes() > 0
+        TE->>AL: leerLote(n)
+        AL-->>TE: lote con las lecturas atrasadas
+        TE->>API: enviarLote(lote)
+        API->>SV: POST /api/v1/lecturas
+        SV->>SV: guardar con su medido_en original y descartar duplicados
+        SV-->>API: 201 con ultimoSeqConfirmado
+        API-->>TE: RespuestaApi
+        TE->>AL: confirmar(ultimoSeqConfirmado)
+    end

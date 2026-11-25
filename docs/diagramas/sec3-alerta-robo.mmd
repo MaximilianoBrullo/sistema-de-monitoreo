@@ -1,0 +1,34 @@
+sequenceDiagram
+    autonumber
+    participant EB as EventBus
+    participant AS as AlertaService
+    participant RA as ReglaAlerta
+    participant AR as AlertaRepository
+    participant NS as NotificacionService
+    participant OR as OutboxRepository
+    participant N as CorreoNotificador
+    EB->>AS: on_lectura_procesada(evento)
+    AS->>AR: activas(generador_id)
+    AR-->>AS: alertas activas
+    loop Por cada regla registrada
+        AS->>RA: evaluar(contexto)
+        RA-->>AS: ResultadoRegla
+    end
+    Note over AS,AR: ReglaDescensoDetenido detectó<br/>una baja con el generador detenido
+    AS->>AS: abrir(generador_id, POSIBLE_ROBO)
+    AS->>AR: guardar(alerta activa)
+    AS->>NS: encolar(alerta, contactos del sitio y globales)
+    NS->>OR: agregar(mensajes)
+    Note over NS,N: Más tarde, el job de notificaciones
+    NS->>OR: pendientes()
+    OR-->>NS: mensajes
+    loop Por cada mensaje
+        NS->>N: enviar(contacto, mensaje)
+        alt Envío exitoso
+            N-->>NS: true
+            NS->>OR: marcar como enviado
+        else Falla
+            N-->>NS: false
+            NS->>OR: programar reintento
+        end
+    end

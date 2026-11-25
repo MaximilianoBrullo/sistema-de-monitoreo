@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant TM as TrabajoMedicion
+    participant S as SensorNivel
+    participant EM as EntradaMarcha
+    participant C as ColaMediciones
+    participant TE as TrabajoEnvio
+    participant AL as AlmacenLocal
+    participant API as ClienteApi
+    participant SV as Servidor
+    TM->>S: leerCm()
+    S-->>TM: altura cruda
+    TM->>EM: enMarcha()
+    EM-->>TM: estado de marcha
+    TM->>C: enviar(medicion)
+    Note over TM,S: espera intervaloActual()<br/>con vTaskDelay
+    TE->>C: recibir(medicion, timeout)
+    C-->>TE: medicion
+    TE->>AL: guardar(medicion)
+    TE->>AL: leerLote(n)
+    AL-->>TE: lote pendiente
+    TE->>API: enviarLote(lote)
+    API->>SV: POST /api/v1/lecturas con token del nodo
+    SV-->>API: 201 con ultimoSeqConfirmado
+    API-->>TE: RespuestaApi
+    TE->>AL: confirmar(ultimoSeqConfirmado)

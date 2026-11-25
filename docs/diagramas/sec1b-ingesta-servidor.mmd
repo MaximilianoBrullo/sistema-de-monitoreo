@@ -1,0 +1,26 @@
+sequenceDiagram
+    autonumber
+    participant N as Nodo ESP32
+    participant R as Router /lecturas
+    participant IS as IngestaService
+    participant NR as NodoRepository
+    participant GF as GeometriaFactory
+    participant LR as LecturaRepository
+    participant EB as EventBus
+    N->>R: POST /api/v1/lecturas con token y lote
+    R->>IS: ingestar(token, lote)
+    IS->>NR: por_token(token)
+    NR-->>IS: Nodo con su generador y tanque
+    alt Token inválido o revocado
+        IS-->>R: rechazo
+        R-->>N: 401
+    else Token válido
+        IS->>IS: descartar seq ya recibidos y valores fuera de rango
+        IS->>GF: crear(tanque)
+        GF-->>IS: GeometriaTanque
+        IS->>IS: litros y porcentaje con geometria.litros(altura)
+        IS->>LR: guardar_lote(lecturas)
+        IS->>EB: publicar(LecturaProcesada)
+        IS-->>R: ResultadoIngesta
+        R-->>N: 201 con ultimoSeqConfirmado y config pendiente
+    end

@@ -1,0 +1,93 @@
+classDiagram
+    direction TB
+    class IngestaService {
+        +ingestar(nodo_id, lote) ResultadoIngesta
+    }
+    class ConsultaService {
+        +estado_actual(generador_id) EstadoGenerador
+        +historial(generador_id, desde, hasta) Serie
+    }
+    class AlertaService {
+        +on_lectura_procesada(evento)
+        +abrir(generador_id, resultado) Alerta
+        +cerrar(alerta_id)
+        +reconocer(alerta_id, usuario)
+    }
+    class NotificacionService {
+        +encolar(alerta, contactos)
+        +procesar_outbox()
+    }
+    class JobDesconexion {
+        +ejecutar()
+    }
+    class EventBus {
+        +suscribir(tipo, handler)
+        +publicar(evento)
+    }
+    class GeometriaFactory {
+        +crear(tanque) GeometriaTanque
+    }
+    class GeometriaTanque {
+        <<interface>>
+        +litros(altura_cm) float
+    }
+    class Rectangular
+    class CilindroHorizontal
+    class TablaCalibracion
+    class ReglaAlerta {
+        <<interface>>
+        +evaluar(contexto) list~ResultadoRegla~
+    }
+    class ReglaUmbral
+    class ReglaDescensoDetenido
+    class ReglaDesconexion
+    class Notificador {
+        <<interface>>
+        +enviar(contacto, mensaje) bool
+    }
+    class CorreoNotificador
+    class WhatsAppNotificador
+    class LecturaRepository {
+        <<interface>>
+        +guardar_lote(lecturas)
+        +ultima(canal_id) Lectura
+        +rango(canal_id, desde, hasta) list~Lectura~
+    }
+    class NodoRepository {
+        <<interface>>
+        +por_token(token) Nodo
+        +activos() list~Nodo~
+    }
+    class AlertaRepository {
+        <<interface>>
+        +activas(generador_id) list~Alerta~
+        +guardar(alerta)
+    }
+    class OutboxRepository {
+        <<interface>>
+        +agregar(mensaje)
+        +pendientes() list~Mensaje~
+    }
+    IngestaService --> NodoRepository
+    IngestaService --> LecturaRepository
+    IngestaService --> GeometriaFactory
+    IngestaService --> EventBus : publica LecturaProcesada
+    ConsultaService --> LecturaRepository
+    EventBus --> AlertaService : notifica
+    AlertaService --> ReglaAlerta
+    AlertaService --> AlertaRepository
+    AlertaService --> NotificacionService
+    JobDesconexion --> NodoRepository
+    JobDesconexion --> ReglaDesconexion
+    JobDesconexion --> AlertaService
+    NotificacionService --> OutboxRepository
+    NotificacionService --> Notificador
+    GeometriaFactory ..> GeometriaTanque : crea
+    GeometriaTanque <|.. Rectangular
+    GeometriaTanque <|.. CilindroHorizontal
+    GeometriaTanque <|.. TablaCalibracion
+    ReglaAlerta <|.. ReglaUmbral
+    ReglaAlerta <|.. ReglaDescensoDetenido
+    ReglaAlerta <|.. ReglaDesconexion
+    Notificador <|.. CorreoNotificador
+    Notificador <|.. WhatsAppNotificador

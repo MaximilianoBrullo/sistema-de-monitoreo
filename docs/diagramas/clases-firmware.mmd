@@ -1,0 +1,117 @@
+classDiagram
+    direction TB
+    class TareaRtos {
+        <<FreeRTOS task>>
+        -const char* nombre
+        -UBaseType_t prioridad
+        -uint32_t pila
+        -BaseType_t nucleo
+        -Trabajo trabajo
+        +iniciar() bool
+        -bucle(param) void
+    }
+    class Trabajo {
+        <<interface>>
+        +ejecutar()
+    }
+    class TrabajoMedicion {
+        -SensorNivel sensor
+        -EntradaMarcha marcha
+        -ColaMediciones cola
+        +ejecutar()
+        -intervaloActual() uint32_t
+    }
+    class TrabajoEnvio {
+        -ColaMediciones cola
+        -AlmacenLocal almacen
+        -ClienteApi api
+        +ejecutar()
+    }
+    class ColaMediciones {
+        <<FreeRTOS queue>>
+        -QueueHandle_t handle
+        +enviar(Medicion m) bool
+        +recibir(Medicion m, timeoutMs) bool
+    }
+    class Medicion {
+        +uint32_t seq
+        +Canal canal
+        +float valor
+        +time_t medidoEn
+        +bool valida
+    }
+    class SensorNivel {
+        <<interface>>
+        +iniciar() bool
+        +leerCm() float
+    }
+    class Ultrasonico
+    class LdrPrueba
+    class EntradaMarcha {
+        +iniciar()
+        +enMarcha() bool
+    }
+    class MedidorBateria {
+        +leerVoltios() float
+    }
+    class Reloj {
+        +sincronizar() bool
+        +ahora() time_t
+    }
+    class Configuracion {
+        +uint32_t intervaloDetenidoS
+        +uint32_t intervaloMarchaS
+        +String urlServidor
+        +cargar()
+        +aplicar(json) bool
+    }
+    class Watchdog {
+        <<esp_task_wdt>>
+        +suscribir()
+        +alimentar()
+    }
+    class AlmacenLocal {
+        +guardar(medicion)
+        +leerLote(n) Lote
+        +confirmar(hastaSeq)
+        +pendientes() size_t
+    }
+    class GestorConexion {
+        -EstadoRed estado
+        +actualizar()
+        +conectado() bool
+    }
+    class ClienteApi {
+        +enviarLote(lote) RespuestaApi
+    }
+    class RespuestaApi {
+        +int codigo
+        +uint32_t ultimoSeqConfirmado
+        +String configNueva
+        +String urlOta
+    }
+    class ActualizadorOta {
+        +actualizar(url) bool
+        +confirmarArranque()
+    }
+    TareaRtos *--> Trabajo : ejecuta
+    Trabajo <|.. TrabajoMedicion
+    Trabajo <|.. TrabajoEnvio
+    TrabajoMedicion --> ColaMediciones : enviar
+    TrabajoEnvio --> ColaMediciones : recibir
+    ColaMediciones ..> Medicion : transporta
+    SensorNivel <|.. Ultrasonico
+    SensorNivel <|.. LdrPrueba
+    TrabajoMedicion --> SensorNivel
+    TrabajoMedicion --> EntradaMarcha
+    TrabajoMedicion --> MedidorBateria
+    TrabajoMedicion --> Reloj
+    TrabajoMedicion --> Configuracion
+    TrabajoMedicion --> Watchdog
+    TrabajoEnvio --> AlmacenLocal
+    TrabajoEnvio --> GestorConexion
+    TrabajoEnvio --> ClienteApi
+    TrabajoEnvio --> Configuracion : aplica config remota
+    TrabajoEnvio --> ActualizadorOta
+    TrabajoEnvio --> Watchdog
+    ClienteApi ..> RespuestaApi

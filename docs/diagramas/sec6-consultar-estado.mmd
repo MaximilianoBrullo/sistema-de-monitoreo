@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuario cliente
+    participant F as Frontend React
+    participant R as Router /generadores
+    participant CS as ConsultaService
+    participant LR as LecturaRepository
+    U->>F: abre el panel
+    loop Cada intervalo de refresco
+        F->>R: GET /api/v1/generadores/id/estado con sesión
+        R->>R: verificar sesión y que el generador sea del cliente
+        R->>CS: estado_actual(generador_id)
+        CS->>LR: ultima(canal_id) por cada canal
+        LR-->>CS: lecturas
+        CS->>CS: armar EstadoGenerador con litros, porcentaje, marcha y en línea
+        CS-->>R: EstadoGenerador
+        R-->>F: 200 con datos ya procesados
+        F-->>U: muestra el estado sin transformar datos
+    end
