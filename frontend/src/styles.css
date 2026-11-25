@@ -1,0 +1,99 @@
+:root {
+  color-scheme: light;
+  --fondo: #eef1f3;
+  --superficie: #ffffff;
+  --texto: #1c2730;
+  --tenue: #5b6b78;
+  --linea: #d3dae0;
+  --acento: #a8770a;
+  --error-fondo: #fbe9e7;
+  --error-texto: #8a2a1c;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --fondo: #151b21;
+    --superficie: #1e262e;
+    --texto: #e6ecf0;
+    --tenue: #93a3b0;
+    --linea: #2e3a45;
+    --acento: #e0a92e;
+    --error-fondo: #3a1f1b;
+    --error-texto: #f4b4a8;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+.contenedor {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.encabezado h1 { margin: 0; font-size: 1.75rem; }
+.tenue { color: var(--tenue); margin: 0.25rem 0 0; }
+
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--linea);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.panel h2 {
+  margin: 0 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--tenue);
+}
+
+.ultima { border-left: 4px solid var(--acento); }
+
+.ultima-valor {
+  margin: 0;
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.unidad { font-size: 1.25rem; font-weight: 400; color: var(--tenue); }
+
+.detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 2rem;
+  margin: 1.25rem 0 0;
+}
+.detalle dt { font-size: 0.8rem; color: var(--tenue); }
+.detalle dd { margin: 0; overflow-wrap: anywhere; }
+
+.grafico { width: 100%; }
+
+.tabla-scroll { max-height: 320px; overflow: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+th, td { text-align: left; padding: 0.4rem 0.75rem; border-bottom: 1px solid var(--linea); }
+th { position: sticky; top: 0; background: var(--superficie); color: var(--tenue); font-weight: 600; }
+.numero { font-variant-numeric: tabular-nums; }
+
+.vacio { color: var(--tenue); margin: 0; }
+
+.error {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: var(--error-fondo);
+  color: var(--error-texto);
+}
